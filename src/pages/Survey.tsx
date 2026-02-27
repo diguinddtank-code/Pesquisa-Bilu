@@ -4,7 +4,7 @@ import { translations, Language } from '../i18n';
 import { Globe } from 'lucide-react';
 
 export default function Survey() {
-  const [lang, setLang] = useState<Language>('pt');
+  const [lang, setLang] = useState<Language>('en');
   const t = translations[lang];
   const navigate = useNavigate();
 
@@ -91,21 +91,25 @@ export default function Survey() {
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-3xl mx-auto">
         
-        {/* Header & Language Selector */}
-        <div className="flex justify-end mb-6">
-          <div className="inline-flex items-center bg-white rounded-full p-1 shadow-sm border border-slate-200">
-            <Globe className="w-4 h-4 text-slate-400 ml-3 mr-2" />
-            {(['pt', 'en', 'es'] as Language[]).map((l) => (
+        {/* Language Selector - Modern Segmented Control */}
+        <div className="flex justify-center mb-10 px-2">
+          <div className="bg-white p-1.5 rounded-full shadow-sm border border-slate-200 flex items-center w-full max-w-lg">
+            {[
+              { code: 'en', label: 'English', flag: '🇺🇸' },
+              { code: 'es', label: 'Español', flag: '🇪🇸' },
+              { code: 'pt', label: 'Português', flag: '🇧🇷' }
+            ].map(({ code, label, flag }) => (
               <button
-                key={l}
-                onClick={() => setLang(l)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                  lang === l 
-                    ? 'bg-emerald-50 text-emerald-700' 
-                    : 'text-slate-500 hover:text-slate-700'
+                key={code}
+                onClick={() => setLang(code as Language)}
+                className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 sm:px-2 rounded-full text-sm sm:text-base font-semibold transition-all duration-300 ${
+                  lang === code 
+                    ? 'bg-emerald-600 text-white shadow-md' 
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
                 }`}
               >
-                {l.toUpperCase()}
+                <span className="text-lg sm:text-xl leading-none drop-shadow-sm">{flag}</span>
+                <span className="tracking-wide">{label}</span>
               </button>
             ))}
           </div>

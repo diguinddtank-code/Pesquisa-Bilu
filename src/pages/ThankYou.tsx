@@ -5,7 +5,7 @@ import { CheckCircle } from 'lucide-react';
 export default function ThankYou() {
   const location = useLocation();
   const navigate = useNavigate();
-  const lang = (location.state?.lang as Language) || 'pt';
+  const lang = (location.state?.lang as Language) || 'en';
   const t = translations[lang];
 
   return (
