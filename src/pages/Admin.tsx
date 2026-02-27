@@ -99,12 +99,38 @@ export default function Admin() {
     );
   }
 
+  // Helper to normalize answers from any language to PT (for aggregation)
+  const normalizeAnswer = (questionKey: string, answer: string): string | null => {
+    if (!answer) return null;
+
+    // Check PT (target) first
+    const ptOptions = translations.pt[`${questionKey}_options` as keyof typeof translations.pt] as string[];
+    if (ptOptions && ptOptions.includes(answer)) return answer;
+
+    // Check EN
+    const enOptions = translations.en[`${questionKey}_options` as keyof typeof translations.en] as string[];
+    if (enOptions) {
+      const idx = enOptions.indexOf(answer);
+      if (idx !== -1 && ptOptions[idx]) return ptOptions[idx];
+    }
+
+    // Check ES
+    const esOptions = translations.es[`${questionKey}_options` as keyof typeof translations.es] as string[];
+    if (esOptions) {
+      const idx = esOptions.indexOf(answer);
+      if (idx !== -1 && ptOptions[idx]) return ptOptions[idx];
+    }
+
+    return null;
+  };
+
   const getChartData = (questionKey: string, options: string[]) => {
     const counts: Record<string, number> = {};
     options.forEach(opt => counts[opt] = 0);
     
     data.forEach(row => {
-      const val = row[questionKey];
+      const rawVal = row[questionKey];
+      const val = normalizeAnswer(questionKey, rawVal);
       if (val && counts[val] !== undefined) {
         counts[val]++;
       }
