@@ -77,9 +77,11 @@ export default function Survey() {
       }
       
       navigate('/thank-you', { state: { lang } });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Submission error:', err);
-      alert('Error submitting feedback. Please try again.');
+      // Show detailed error message to help debugging
+      const errorMessage = err.message || 'Unknown error';
+      alert(`Error submitting feedback: ${errorMessage}. Please try again.`);
     }
   };
 
