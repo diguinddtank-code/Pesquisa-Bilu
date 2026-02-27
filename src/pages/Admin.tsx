@@ -28,22 +28,18 @@ export default function Admin() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      if (supabase) {
-        const { data: storedData, error } = await supabase
-          .from('feedback')
-          .select('*')
-          .order('created_at', { ascending: false });
+      const { data: storedData, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        setData(storedData || []);
-      } else {
-        // Fallback to localStorage
-        const storedData = JSON.parse(localStorage.getItem('feedback_data') || '[]');
-        storedData.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        setData(storedData);
+      if (error) {
+        throw error;
       }
+      
+      setData(storedData || []);
     } catch (err) {
-      console.error('Fetch error:', err);
+      console.error('Supabase fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -53,21 +49,19 @@ export default function Admin() {
     if (window.confirm('Tem certeza que deseja apagar TODOS os dados de feedback? Esta ação não pode ser desfeita.')) {
       setLoading(true);
       try {
-        if (supabase) {
-          const { error } = await supabase
-            .from('feedback')
-            .delete()
-            .neq('id', 0);
+        const { error } = await supabase
+          .from('feedback')
+          .delete()
+          .neq('id', 0); // Deletes all rows where id is not 0 (which is all rows)
 
-          if (error) throw error;
-        } else {
-          localStorage.removeItem('feedback_data');
+        if (error) {
+          throw error;
         }
 
         setData([]);
         alert('Dados apagados com sucesso.');
       } catch (err) {
-        console.error('Delete error:', err);
+        console.error('Supabase delete error:', err);
         alert('Erro ao apagar os dados.');
       } finally {
         setLoading(false);

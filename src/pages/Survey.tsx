@@ -43,42 +43,32 @@ export default function Survey() {
     }
 
     try {
-      if (supabase) {
-        // Save to Supabase if configured
-        const { error } = await supabase
-          .from('feedback')
-          .insert([
-            {
-              q1: formData.q1,
-              q2: formData.q2,
-              q3: formData.q3,
-              q4: formData.q4,
-              q5: formData.q5,
-              q6: formData.q6,
-              q7: formData.q7,
-              q8: formData.q8,
-              q9: formData.q9,
-              q10: formData.q10,
-              language: lang
-            }
-          ]);
+      // Save to Supabase
+      const { error } = await supabase
+        .from('feedback')
+        .insert([
+          {
+            q1: formData.q1,
+            q2: formData.q2,
+            q3: formData.q3,
+            q4: formData.q4,
+            q5: formData.q5,
+            q6: formData.q6,
+            q7: formData.q7,
+            q8: formData.q8,
+            q9: formData.q9,
+            q10: formData.q10,
+            language: lang
+          }
+        ]);
 
-        if (error) throw error;
-      } else {
-        // Fallback to localStorage if Supabase is not configured
-        const existingData = JSON.parse(localStorage.getItem('feedback_data') || '[]');
-        const newFeedback = {
-          ...formData,
-          language: lang,
-          created_at: new Date().toISOString()
-        };
-        existingData.push(newFeedback);
-        localStorage.setItem('feedback_data', JSON.stringify(existingData));
+      if (error) {
+        throw error;
       }
       
       navigate('/thank-you', { state: { lang } });
     } catch (err: any) {
-      console.error('Submission error:', err);
+      console.error('Supabase error:', err);
       // Show detailed error message to help debugging
       const errorMessage = err.message || 'Unknown error';
       alert(`Error submitting feedback: ${errorMessage}. Please try again.`);

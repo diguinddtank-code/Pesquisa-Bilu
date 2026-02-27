@@ -1,14 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Use provided credentials or environment variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://supabase.infra-remakingautomacoes.cloud';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzE1MDUwODAwLAogICJleHAiOiAxODcyODE3MjAwCn0.VFKkaPwcpuWYV2L-iMR5K_07259lQZvOUX67u0a8W4Q';
 
-// Check if variables are set and not placeholders
-const isConfigured = supabaseUrl && 
-                     supabaseAnonKey && 
-                     supabaseUrl !== 'sua_url_do_supabase_aqui' &&
-                     supabaseUrl.startsWith('http');
-
-export const supabase = isConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey) 
-  : null;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
