@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { translations } from '../i18n';
 import { Lock, LogOut, Download, Trash2, RefreshCw } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
@@ -27,11 +28,22 @@ export default function Admin() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/feedback');
-      const json = await res.json();
-      setData(json);
+      if (supabase) {
+        const { data: storedData, error } = await supabase
+          .from('feedback')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setData(storedData || []);
+      } else {
+        // Fallback to localStorage
+        const storedData = JSON.parse(localStorage.getItem('feedback_data') || '[]');
+        storedData.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setData(storedData);
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -41,15 +53,21 @@ export default function Admin() {
     if (window.confirm('Tem certeza que deseja apagar TODOS os dados de feedback? Esta ação não pode ser desfeita.')) {
       setLoading(true);
       try {
-        const res = await fetch('/api/feedback/reset', { method: 'POST' });
-        if (res.ok) {
-          setData([]);
-          alert('Dados apagados com sucesso.');
+        if (supabase) {
+          const { error } = await supabase
+            .from('feedback')
+            .delete()
+            .neq('id', 0);
+
+          if (error) throw error;
         } else {
-          alert('Erro ao apagar os dados.');
+          localStorage.removeItem('feedback_data');
         }
+
+        setData([]);
+        alert('Dados apagados com sucesso.');
       } catch (err) {
-        console.error(err);
+        console.error('Delete error:', err);
         alert('Erro ao apagar os dados.');
       } finally {
         setLoading(false);

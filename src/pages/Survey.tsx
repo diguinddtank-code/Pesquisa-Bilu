@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { translations, Language } from '../i18n';
 import { Globe } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function Survey() {
   const [lang, setLang] = useState<Language>('en');
@@ -42,19 +43,42 @@ export default function Survey() {
     }
 
     try {
-      const res = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, language: lang })
-      });
-      
-      if (res.ok) {
-        navigate('/thank-you', { state: { lang } });
+      if (supabase) {
+        // Save to Supabase if configured
+        const { error } = await supabase
+          .from('feedback')
+          .insert([
+            {
+              q1: formData.q1,
+              q2: formData.q2,
+              q3: formData.q3,
+              q4: formData.q4,
+              q5: formData.q5,
+              q6: formData.q6,
+              q7: formData.q7,
+              q8: formData.q8,
+              q9: formData.q9,
+              q10: formData.q10,
+              language: lang
+            }
+          ]);
+
+        if (error) throw error;
       } else {
-        alert('Error submitting feedback. Please try again.');
+        // Fallback to localStorage if Supabase is not configured
+        const existingData = JSON.parse(localStorage.getItem('feedback_data') || '[]');
+        const newFeedback = {
+          ...formData,
+          language: lang,
+          created_at: new Date().toISOString()
+        };
+        existingData.push(newFeedback);
+        localStorage.setItem('feedback_data', JSON.stringify(existingData));
       }
+      
+      navigate('/thank-you', { state: { lang } });
     } catch (err) {
-      console.error(err);
+      console.error('Submission error:', err);
       alert('Error submitting feedback. Please try again.');
     }
   };
